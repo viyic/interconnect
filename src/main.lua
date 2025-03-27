@@ -1,19 +1,23 @@
 local mode = nil
+
 local function set_mode(new_mode)
   mode = require(new_mode)
-  return mode.load()
+  mode.load()
 end
+
 local font = love.graphics.newFont("data/font/IBMPlexMono-Regular.ttf", 24)
 local music = love.audio.newSource("data/audio/stardust-ep-track-1-exclusive-pixabay-music-196787.mp3", "static")
 music:setLooping(true)
+
 love.load = function()
   love.graphics.setFont(font)
-  return set_mode("src.menu")
+  set_mode("src.menu")
 end
+
 love.update = function(dt)
-  return mode.update(dt, set_mode)
+  mode.update(dt, set_mode)
 end
+
 love.draw = function()
-  return mode.draw(set_mode)
+  mode.draw(set_mode)
 end
-return love.draw 

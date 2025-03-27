@@ -1,12 +1,18 @@
+require('src.common')
+
 local window_width = love.graphics.getWidth()
 local window_height = love.graphics.getHeight()
 local grid_size = 100
+
 local camera = {x = 0, y = 0}
+
 local mx = 0
 local my = 0
+
 local context_menu_open = false
 local context_menu_x = 0
 local context_menu_y = 0
+
 local builds = {"drill", "processor", "connector"}
 local build_prices = {25, 40, "10/grid"}
 local building = 0
@@ -17,9 +23,11 @@ local building_to = 0
 local building_entity = 0
 local building_obstructed = false
 local building_price = 0
+
 local entities = {}
 local connectors = {}
 local effects = {}
+
 local gen_id = 1
 local drill_max_durability = 100
 local drill_price = 25
@@ -30,38 +38,39 @@ local fuel = 0
 local gold = 100
 local energy_time = 1
 local energy_timer = 1
-local function create_entity(x, y, type, entity)
+
+local small_font = love.graphics.newFont("data/font/IBMPlexMono-Regular.ttf", 14)
+
+function create_entity(x, y, type, entity)
   local id = gen_id
   gen_id = (gen_id + 1)
+
   local w, h = nil, nil
   if (type == "generator") then
     w, h = 2, 2
   else
     w, h = 1, 1
   end
+
   local durability
   if (type == "drill") then
     durability = drill_max_durability
   else
     durability = 99999
   end
+
   local drill_type
   if (type == "drill") then
     drill_type = entity.type
   else
     drill_type = nil
   end
+
   return table.insert(entities, {id = id, x = x, y = y, w = w, h = h, type = type, ["drill-type"] = drill_type, durability = durability})
 end
-local function point_in_rectangle_3f(x, y, x1, y1, x2, y2)
-  if ((x >= x1) and (x <= x2) and (y >= y1) and (y <= y2)) then
-    return true
-  else
-    return false
-  end
-end
-local function get_entity_id_from_position(x, y, _3fi)
-  local index = (_3fi or 1)
+
+function get_entity_id_from_position(x, y, ix)
+  local index = (ix or 1)
   local entity = entities[index]
   if (entity == nil) then
     return 0
@@ -71,8 +80,9 @@ local function get_entity_id_from_position(x, y, _3fi)
     return get_entity_id_from_position(x, y, (index + 1))
   end
 end
-local function get_entity_index_from_id(id, _3fi)
-  local index = (_3fi or 1)
+
+function get_entity_index_from_id(id, ix)
+  local index = (ix or 1)
   local entity = entities[index]
   if (entity == nil) then
     return 0
@@ -82,12 +92,16 @@ local function get_entity_index_from_id(id, _3fi)
     return get_entity_index_from_id(id, (index + 1))
   end
 end
-local function create_effect(x, y, type, text)
+
+function create_effect(x, y, type, text)
   return table.insert(effects, {x = x, y = y, type = type, text = text, timer = 1})
 end
-local function load()
+
+function load()
   math.randomseed(os.time())
+
   create_entity(4, 3, "generator")
+
   for index = 1, 20 do
     local function create_gold()
       local x = lume.round(lume.random(-15, 15))
@@ -105,6 +119,7 @@ local function load()
     end
     create_gold()
   end
+
   for index = 1, 20 do
     local function create_fuel()
       local x = lume.round(lume.random(-15, 15))
@@ -122,10 +137,30 @@ local function load()
     end
     create_fuel()
   end
-  return nil
 end
-local mouse = {left = {index = 1, down = false, pressed = false, released = false}, right = {index = 2, down = false, pressed = false, released = false}, middle = {index = 3, down = false, pressed = false, released = false}}
-local function update_mouse()
+
+local mouse = {
+  left = {
+    index = 1,
+    down = false,
+    pressed = false,
+    released = false
+  },
+  right = {
+      index = 2,
+    down = false,
+    pressed = false,
+    released = false
+  },
+  middle = {
+    index = 3,
+    down = false,
+    pressed = false,
+    released = false
+  }
+}
+
+function update_mouse()
   for key, button in pairs(mouse) do
     local down = love.mouse.isDown(button.index)
     if down then
@@ -139,12 +174,14 @@ local function update_mouse()
     else
     end
   end
-  return nil
 end
-local function update(dt, set_mode)
+
+function update(dt, set_mode)
   mx, my = love.mouse.getPosition()
   update_mouse()
+
   local cam_speed = 200
+
   if love.keyboard.isDown("escape") then
     entities = {}
     connectors = {}
@@ -154,8 +191,8 @@ local function update(dt, set_mode)
     energy_time = 1
     energy_timer = 1
     set_mode("src.menu")
-  else
   end
+
   local margin_x = 200
   local build_w = (window_width - (margin_x * 2))
   local build_h = 100
@@ -165,26 +202,27 @@ local function update(dt, set_mode)
   local scroll_area = 100
   if (love.keyboard.isDown("w") or (not hover and (my < scroll_area))) then
     camera.y = (camera.y - (dt * cam_speed))
-  else
   end
+
   if (love.keyboard.isDown("s") or (not hover and (my > (window_height - scroll_area)))) then
     camera.y = (camera.y + (dt * cam_speed))
-  else
   end
+
   if (love.keyboard.isDown("a") or (not hover and (mx < scroll_area))) then
     camera.x = (camera.x - (dt * cam_speed))
-  else
   end
+
   if (love.keyboard.isDown("d") or (not hover and (mx > (window_width - scroll_area)))) then
     camera.x = (camera.x + (dt * cam_speed))
-  else
   end
+
   camera.x = math.min(math.max(camera.x, (-22 * grid_size)), (22 * grid_size))
   camera.y = math.min(math.max(camera.y, (-22 * grid_size)), (22 * grid_size))
+
   if (energy_timer > 0) then
     energy_timer = (energy_timer - dt)
-  else
   end
+
   if (energy_timer <= 0) then
     for index, connector in ipairs(connectors) do
       if (generator_energy > 0) then
@@ -192,26 +230,24 @@ local function update(dt, set_mode)
         if (to.type == "drill") then
           if (to["drill-type"] == "gold") then
             gold = (gold + 1)
-          else
           end
           if (to["drill-type"] == "fuel") then
             fuel = (fuel + 1)
-          else
           end
-        else
         end
         if ((to.type == "processor") and (fuel >= 1)) then
           fuel = (fuel - 1)
+
           generator_energy = (generator_energy + 4)
-        else
         end
+
         generator_energy = (generator_energy - 1)
-      else
       end
     end
+
     energy_timer = (energy_timer + energy_time)
-  else
   end
+
   if (building ~= 0) then
     building_x = lume.round((((mx + camera.x) - (grid_size / 2)) / grid_size))
     building_y = lume.round((((my + camera.y) - (grid_size / 2)) / grid_size))
@@ -222,60 +258,54 @@ local function update(dt, set_mode)
     if (build == "drill") then
       if ((entity ~= nil) and ((entity.type == "gold") or (entity.type == "fuel")) and (gold >= drill_price)) then
         building_obstructed = false
-      else
       end
-    else
     end
+
     if (build == "connector") then
       if ((entity ~= nil) and ((entity.type ~= "gold") or ("gold" ~= "fuel"))) then
         building_obstructed = false
-      else
       end
+
       local from = entities[get_entity_index_from_id(building_from)]
       local to = entity
       if ((from ~= nil) and (to ~= nil)) then
         local price = lume.round((lume.distance((from.x + (from.w / 2)), (to.x + (to.w / 2)), (from.y + (from.h / 2)), (to.y + (to.h / 2))) * connector_price))
         if (price ~= 0) then
           building_price = price
-        else
         end
-      else
       end
-    else
     end
+
     if (build == "processor") then
       if (entity == nil) then
         building_obstructed = false
-      else
       end
-    else
     end
+
     if mouse.left.pressed then
       if not building_obstructed then
         if (build ~= "connector") then
           create_entity(building_x, building_y, build, entity)
           if (build == "processor") then
             gold = (gold - processor_price)
-          else
           end
           if (build == "drill") then
             gold = (gold - drill_price)
             table.remove(entities, get_entity_index_from_id(building_entity))
-          else
           end
           building = 0
-        else
         end
+
         if (build == "connector") then
           local step = false
           if (building_from == 0) then
             if (entity.type == "generator") then
               building_from = building_entity
-            else
             end
+
             if (entity.type ~= "generator") then
-              local function get_connector_index_from_entity_id(id, _3fi)
-                local index = (_3fi or 1)
+              local function get_connector_index_from_entity_id(id, ix)
+                local index = (ix or 1)
                 local connector = connectors[index]
                 db(id)
                 db(connector)
@@ -290,71 +320,48 @@ local function update(dt, set_mode)
               local connector = get_connector_index_from_entity_id(entity.id)
               if (connector ~= 0) then
                 building_from = building_entity
-              else
               end
-            else
             end
+
             step = true
-          else
           end
           if ((building_from ~= 0) and (building_to == 0) and not step) then
             local from = entities[get_entity_index_from_id(building_from)]
             local to = entity
+
             if ((gold >= building_price) and (from.id ~= to.id)) then
               building_to = building_entity
               gold = (gold - building_price)
               table.insert(connectors, {from = building_from, to = building_to})
-            else
             end
+
             building = 0
             building_from = 0
             building_to = 0
-          else
           end
-        else
         end
-      else
       end
+
       if building_obstructed then
         building = 0
         building_from = 0
         building_to = 0
-      else
       end
-    else
     end
-  else
   end
+
   if (love.keyboard.isDown("c") or love.keyboard.isDown("space")) then
     camera.x = 0
     camera.y = 0
-    return nil
-  else
-    return nil
   end
 end
-local function draw_rectangle(mode, x, y, w, h, radius)
-  return love.graphics.rectangle(mode, x, y, w, h, radius)
-end
-local function draw_rectangle_centered(mode, x, y, w, h, radius)
-  return love.graphics.rectangle(mode, (x - (w / 2)), (y - (h / 2)), w, h, radius)
-end
-local function draw_text(x, y, text)
-  local font = love.graphics.getFont()
-  return love.graphics.print(text, x, y, 0, 1, 1, (font:getWidth(text) / 2), (font:getHeight() / 2))
-end
-local function draw_line(x1, y1, x2, y2, width)
-  love.graphics.setLineWidth(width)
-  return love.graphics.line(x1, y1, x2, y2)
-end
-local function rgb(r, g, b)
-  return (r / 255), (g / 255), (b / 255)
-end
-local small_font = love.graphics.newFont("data/font/IBMPlexMono-Regular.ttf", 14)
-local function draw(set_mode)
+
+function draw(set_mode)
   love.graphics.clear(1, 1, 1)
+
   love.graphics.push()
   love.graphics.translate(( - camera.x), ( - camera.y))
+
   local x = ((lume.round((camera.x / grid_size)) - 1) * grid_size)
   local y = ((lume.round((camera.y / grid_size)) - 1) * grid_size)
   for index = 1, 10 do
@@ -366,6 +373,7 @@ local function draw(set_mode)
       draw_line((x + (inner_index * 25)), (y + (index * grid_size)), ((x + (inner_index * 25)) + 12.5), (y + (index * grid_size)), 3)
     end
   end
+
   local previous_font = love.graphics.getFont()
   love.graphics.setFont(small_font)
   for index, entity in ipairs(entities) do
@@ -375,39 +383,40 @@ local function draw(set_mode)
     local h = (entity.h * grid_size)
     local text_x = (x0 + (w / 2))
     local text_y = (y0 + (h / 2))
+
     if (entity.type == "generator") then
       love.graphics.setColor(1, 0, 0.6)
       draw_rectangle("fill", x0, y0, w, h, 5)
       love.graphics.setColor(1, 1, 1)
       draw_text(text_x, text_y, entity.type)
       draw_text(text_x, (text_y + 24), generator_energy)
-    else
     end
+
     if (entity.type == "drill") then
       love.graphics.setColor(0, 0.6, 1)
       draw_rectangle("fill", x0, y0, w, h, 5)
       love.graphics.setColor(1, 1, 1)
       draw_text(text_x, text_y, entity.type)
-    else
     end
+
     if (entity.type == "processor") then
       love.graphics.setColor(rgb(51, 204, 47))
       draw_rectangle("fill", x0, y0, w, h, 5)
       love.graphics.setColor(1, 1, 1)
       draw_text(text_x, text_y, entity.type)
-    else
     end
+
     if (entity.type == "gold") then
       love.graphics.setColor(rgb(228, 196, 21))
       draw_rectangle("fill", x0, y0, w, h, 5)
-    else
     end
+
     if (entity.type == "fuel") then
       love.graphics.setColor(rgb(90, 70, 58))
       draw_rectangle("fill", x0, y0, w, h, 5)
-    else
     end
   end
+
   for index, connector in ipairs(connectors) do
     local from = entities[get_entity_index_from_id(connector.from)]
     local to = entities[get_entity_index_from_id(connector.to)]
@@ -420,6 +429,7 @@ local function draw(set_mode)
     draw_line(from_x, from_y, to_x, to_y, 5)
     love.graphics.circle("fill", to_x, to_y, 10)
   end
+
   if (building ~= 0) then
     local entity = entities[get_entity_index_from_id(building_entity)]
     local x0 = (building_x * grid_size)
@@ -434,8 +444,8 @@ local function draw(set_mode)
       draw_rectangle("fill", x0, y0, grid_size, grid_size, 5)
       love.graphics.setColor(1, 1, 1)
       draw_text((x0 + (grid_size / 2)), (y0 + (grid_size / 2)), build)
-    else
     end
+
     if (build == "processor") then
       if not building_obstructed then
         love.graphics.setColor(rgb(51, 204, 47))
@@ -445,30 +455,30 @@ local function draw(set_mode)
       draw_rectangle("fill", x0, y0, grid_size, grid_size, 5)
       love.graphics.setColor(1, 1, 1)
       draw_text((x0 + (grid_size / 2)), (y0 + (grid_size / 2)), build)
-    else
     end
+
     if (build == "connector") then
       if (building_from == 0) then
         local x1
-        local _58_
+        local grid_x1
         if entity then
-          _58_ = (entity.x + ((entity.w - 1) / 2))
+          grid_x1 = (entity.x + ((entity.w - 1) / 2))
         else
-          _58_ = building_x
+          grid_x1 = building_x
         end
-        x1 = (_58_ * grid_size)
+        x1 = (grid_x1 * grid_size)
         local y1
-        local _60_
+        local grid_y1
         if entity then
-          _60_ = (entity.y + ((entity.h - 1) / 2))
+          grid_y1 = (entity.y + ((entity.h - 1) / 2))
         else
-          _60_ = building_y
+          grid_y1 = building_y
         end
-        y1 = (_60_ * grid_size)
+        y1 = (grid_y1 * grid_size)
         love.graphics.setColor(1, 0, 0.2)
         love.graphics.circle("fill", (x1 + (grid_size / 2)), (y1 + (grid_size / 2)), 10)
-      else
       end
+
       if (building_from ~= 0) then
         local x1 = (building_x * grid_size)
         local y1 = (building_y * grid_size)
@@ -479,20 +489,21 @@ local function draw(set_mode)
         love.graphics.circle("fill", (x1 + (grid_size / 2)), (y1 + (grid_size / 2)), 10)
         love.graphics.circle("fill", from_x, from_y, 10)
         draw_line(from_x, from_y, ((building_x + 0.5) * grid_size), ((building_y + 0.5) * grid_size), 5)
-      else
       end
-    else
     end
-  else
   end
+
   love.graphics.pop()
+
   local margin_x = 200
   local w = (window_width - (margin_x * 2))
   local h = 100
+
   love.graphics.setColor(1, 1, 1)
   draw_rectangle("fill", margin_x, (window_height - h), w, h, 5)
   love.graphics.setColor(rgb(71, 222, 220))
   draw_rectangle("line", margin_x, (window_height - h), w, h, 5)
+
   for index, build in ipairs(builds) do
     local build_w = (w / #builds)
     local build_h = h
@@ -514,9 +525,9 @@ local function draw(set_mode)
     draw_text((build_x + (build_w / 2)), ((build_y + (build_h / 2)) + small_font:getHeight()), ("gold " .. build_prices[index]))
     if (hover and mouse.left.pressed) then
       building = index
-    else
     end
   end
+
   love.graphics.setFont(previous_font)
   love.graphics.setColor(rgb(228, 196, 21))
   love.graphics.print(("gold " .. gold), 20, 20)
@@ -524,10 +535,10 @@ local function draw(set_mode)
   love.graphics.print(("fuel " .. fuel), 20, (20 + 26))
   love.graphics.setColor(0, 0, 0)
   love.graphics.circle("fill", mx, my, 4)
+
   if (generator_energy <= 0) then
     return set_mode("menu")
-  else
-    return nil
   end
 end
+
 return {load = load, update = update, draw = draw} 
