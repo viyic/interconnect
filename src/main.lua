@@ -1,6 +1,6 @@
 require('src.common')
 
-local mode = nil
+local mode = { load = nil, update = nil, draw = nil }
 
 local function set_mode(new_mode)
   mode = require(new_mode)

@@ -13,16 +13,18 @@ function draw(set_mode)
   love.graphics.clear(1, 1, 1)
   love.graphics.setColor(0, 0, 0)
   draw_text((window_width / 2), 50, "interconnect")
-  local menus = {"play", "quit"}
+  local menus = { "play", "quit" }
   local x = 0
   local y = 0
   for index = 1, 10 do
     love.graphics.setColor((157 / 255), (236 / 255), (235 / 255))
     for inner_index = 0, 35 do
-      draw_line((x + (index * grid_size)), (y + (inner_index * 25)), (x + (index * grid_size)), ((y + (inner_index * 25)) + 12.5), 3)
+      draw_line((x + (index * grid_size)), (y + (inner_index * 25)), (x + (index * grid_size)),
+        ((y + (inner_index * 25)) + 12.5), 3)
     end
     for inner_index = 0, 45 do
-      draw_line((x + (inner_index * 25)), (y + (index * grid_size)), ((x + (inner_index * 25)) + 12.5), (y + (index * grid_size)), 3)
+      draw_line((x + (inner_index * 25)), (y + (index * grid_size)), ((x + (inner_index * 25)) + 12.5),
+        (y + (index * grid_size)), 3)
     end
   end
 
@@ -37,7 +39,7 @@ function draw(set_mode)
     local build_h = (h / #menus)
     local build_x = margin_x
     local build_y = (margin_x + ((index - 1) * build_h))
-    local hover = point_in_rectangle_3f(mx, my, build_x, build_y, (build_x + build_w), (build_y + build_h))
+    local hover = point_in_rectangle(mx, my, build_x, build_y, (build_x + build_w), (build_y + build_h))
 
     if hover then
       love.graphics.setColor(0, 0.6, 1)
@@ -68,4 +70,4 @@ end
 function load()
 end
 
-return {load = load, update = update, draw = draw} 
+return { load = load, update = update, draw = draw }
