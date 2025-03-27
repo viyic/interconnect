@@ -26,19 +26,16 @@
 
 (fn draw-line [x1 y1 x2 y2 width]
   (love.graphics.setLineWidth width)
-  (love.graphics.line x1 y1 x2 y2)
-  )
+  (love.graphics.line x1 y1 x2 y2))
 
 (fn rgb [r g b]
-  (values (/ r 255) (/ g 255) (/ b 255))
-  )
+  (values (/ r 255) (/ g 255) (/ b 255)))
 
 (fn update [dt set-mode]
-  (set (mx my) (love.mouse.getPosition))
+  (set (mx my) (love.mouse.getPosition)))
   ; (when
   ;   (love.keyboard.isDown :escape) (love.event.quit))
     ; (love.keyboard.isDown :up) (set selected (+ (% (+ selected 1) (length menus)) 1))
-    )
 
 (fn draw [set-mode]
   (love.graphics.clear 1 1 1)
@@ -57,12 +54,10 @@
     ; (draw-line (+ x (* index grid-size)) y (+ x (* index grid-size)) (+ y 9999) 3)
     ; (draw-line x (+ y (* index grid-size)) (+ x 9999) (+ y (* index grid-size)) 3)
     (for [inner_index 0 35]
-      (draw-line (+ x (* index grid-size)) (+ y (* inner_index 25)) (+ x (* index grid-size)) (+ (+ y (* inner_index 25)) 12.5) 3)
-    )
+      (draw-line (+ x (* index grid-size)) (+ y (* inner_index 25)) (+ x (* index grid-size)) (+ (+ y (* inner_index 25)) 12.5) 3))
+    
     (for [inner_index 0 45]
-      (draw-line (+ x (* inner_index 25)) (+ y (* index grid-size)) (+ (+ x (* inner_index 25)) 12.5) (+ y (* index grid-size)) 3)
-    )
-  )
+      (draw-line (+ x (* inner_index 25)) (+ y (* index grid-size)) (+ (+ x (* inner_index 25)) 12.5) (+ y (* index grid-size)) 3)))
 
   (var margin-x 300)
   (var w (- window-width (* margin-x 2)))
@@ -78,8 +73,8 @@
     (local hover (point-in-rectangle? mx my build-x build-y (+ build-x build-w) (+ build-y build-h)))
     (if hover
       (love.graphics.setColor 0 0.6 1)
-      (love.graphics.setColor 1 1 1)
-      )
+      (love.graphics.setColor 1 1 1))
+      
     (draw-rectangle :fill build-x build-y build-w build-h 5)
     (if hover
       (love.graphics.setColor 1 1 1)
@@ -89,10 +84,7 @@
       (when (= index 1)
         (set-mode :src.game))
       (when (= index 2)
-        (love.event.quit))
-    )
-  )
-)
+        (love.event.quit)))))
 
 (fn load []
   true)
