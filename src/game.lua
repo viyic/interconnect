@@ -33,7 +33,7 @@ local connector_price = 10
 local processor_price = 40
 local generator_energy = 1000
 local fuel = 0
-local gold = 100
+local gold = 200
 local energy_time = 1
 local energy_timer = 1
 
@@ -186,7 +186,7 @@ function update(dt, set_mode)
     connectors = {}
     generator_energy = 1000
     fuel = 0
-    gold = 100
+    gold = 200
     energy_time = 1
     energy_timer = 1
     set_mode("src.menu")

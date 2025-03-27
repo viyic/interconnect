@@ -13,6 +13,7 @@ music:setLooping(true)
 
 love.load = function()
   love.graphics.setFont(font)
+  music:play()
   set_mode("src.menu")
 end
 
