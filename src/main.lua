@@ -1,3 +1,5 @@
+require('src.common')
+
 local mode = nil
 
 local function set_mode(new_mode)

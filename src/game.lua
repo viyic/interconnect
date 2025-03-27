@@ -1,5 +1,3 @@
-require('src.common')
-
 local window_width = love.graphics.getWidth()
 local window_height = love.graphics.getHeight()
 local grid_size = 100
